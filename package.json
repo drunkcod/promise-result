@@ -1,18 +1,40 @@
 {
 	"name": "@drunkcod/promise-result",
 	"type": "module",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Promise.result because, yeah.",
-	"main": "lib/promise-result.js",
-	"types": "lib/promise-result.d.ts",
 	"files": [
 		"lib/**/*",
 		"!lib/**/*.spec.*"
 	],
+	"exports": {
+		".": {
+			"import": {
+				"default": "./lib/index.js",
+				"types": "./lib/index.d.ts"
+			},
+			"require": {
+				"default": "./lib/cjs/index.js",
+				"types": "./lib/cjs/index.d.ts"
+			}
+		},
+		"./result": {
+			"import": {
+				"default": "./lib/result.js",
+				"types": "./lib/result.d.ts"
+			},
+			"require": {
+				"default": "./lib/cjs/result.js",
+				"types": "./lib/cjs/result.d.ts"
+			}
+		}
+	},
 	"scripts": {
 		"clean": "rimraf lib",
 		"compile": "tsc",
-		"build": "npm-run-all clean compile --silent",
+		"cjs:compile": "tsc --module commonjs --outdir lib/cjs",
+		"cjs:fixup": "echo '{\"type\": \"commonjs\"}' > lib/cjs/package.json",
+		"build": "npm-run-all clean -p compile cjs:compile -s cjs:fixup --silent",
 		"test": "jest"
 	},
 	"keywords": [
