@@ -16,3 +16,27 @@ export function result<Fn extends AnyFn>(fn: Fn): ResultFn<Fn> {
 		}
 	};
 }
+
+export function safeCall<Fn extends AnyFn>(
+	fn: Fn,
+	thisArg?: ThisParameterType<Fn>,
+	...args: Parameters<Fn>
+): Result<ReturnType<Fn>> {
+	try {
+		return [null, fn.call(thisArg, ...args)];
+	} catch (error: unknown) {
+		return [ensureError(error, safeCall), null];
+	}
+}
+
+export function safeApply<Fn extends AnyFn>(
+	fn: Fn,
+	thisArg: ThisParameterType<Fn>,
+	args: Parameters<Fn>,
+): Result<ReturnType<Fn>> {
+	try {
+		return [null, fn.apply(thisArg, args)];
+	} catch (error: unknown) {
+		return [ensureError(error, safeCall), null];
+	}
+}

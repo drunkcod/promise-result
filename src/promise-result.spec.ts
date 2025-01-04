@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 import './promise-result.js';
-import { result } from './index.js';
+import { result, safeApply, safeCall } from './index.js';
 
 describe('Promise.result', () => {
 	test('success', async () => {
@@ -48,5 +48,41 @@ describe('result', () => {
 			throw 'rocks';
 		})();
 		//console.log(error);
+	});
+});
+
+describe('safeCall', () => {
+	test('success', () => {
+		const double = (x: number) => x + x;
+		expect(safeCall(double, null, 21)).toEqual([null, 42]);
+	});
+
+	test('error', () => {
+		const error = new Error();
+		expect(
+			safeCall(() => {
+				throw Error();
+			}),
+		).toEqual([error, null]);
+	});
+});
+
+describe('safeApply', () => {
+	test('success', () => {
+		const double = (x: number) => x + x;
+		expect(safeApply(double, null, [21])).toEqual([null, 42]);
+	});
+
+	test('error', () => {
+		const error = new Error();
+		expect(
+			safeApply(
+				() => {
+					throw Error();
+				},
+				null,
+				[],
+			),
+		).toEqual([error, null]);
 	});
 });
