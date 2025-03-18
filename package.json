@@ -1,7 +1,9 @@
 {
 	"name": "@drunkcod/promise-result",
 	"type": "module",
-	"version": "0.0.2",
+	"version": "0.0.3",
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
 	"description": "Promise.result because, yeah.",
 	"files": [
 		"lib/**/*",
@@ -47,12 +49,12 @@
 		"@babel/preset-typescript": "^7.25.7",
 		"@drunkcod/ts-jest-esm": "^0.0.1",
 		"@jest/globals": "^29.7.0",
-		"@types/node": "^20.14.1",
+		"@types/node": "^22.13.10",
 		"jest": "^29.7.0",
 		"npm-run-all": "^4.1.5",
-		"prettier": "^3.3.3",
+		"prettier": "^3.5.3",
 		"rimraf": "^6.0.1",
-		"ts-jest": "^29.2.5",
-		"typescript": "^5.6.2"
+		"ts-jest": "^29.2.6",
+		"typescript": "^5.8.2"
 	}
 }
