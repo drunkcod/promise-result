@@ -1,6 +1,6 @@
 import { ensureError } from './ensureError.js';
 
-export type Result<T> = [null, T] | [Error, null];
+export type Result<T> = [error: null, value: T] | [error: Error, value: null];
 
 type AnyFn = (...args: any[]) => any;
 
@@ -37,6 +37,6 @@ export function safeApply<Fn extends AnyFn>(
 	try {
 		return [null, fn.apply(thisArg, args)];
 	} catch (error: unknown) {
-		return [ensureError(error, safeCall), null];
+		return [ensureError(error, safeApply), null];
 	}
 }
