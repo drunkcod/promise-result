@@ -1,4 +1,4 @@
-import { ensureError } from './ensureError.js';
+import { errorResult } from './ensureError.js';
 
 export type Result<T> = [error: null, value: T] | [error: Error, value: null];
 
@@ -12,7 +12,7 @@ export function result<Fn extends AnyFn>(fn: Fn): ResultFn<Fn> {
 		try {
 			return [null, fn.call(this, ...args)];
 		} catch (error: unknown) {
-			return [ensureError(error, result), null];
+			return errorResult(error, result);
 		}
 	};
 }
@@ -25,7 +25,7 @@ export function safeCall<Fn extends AnyFn>(
 	try {
 		return [null, fn.call(thisArg, ...args)];
 	} catch (error: unknown) {
-		return [ensureError(error, safeCall), null];
+		return errorResult(error, safeCall);
 	}
 }
 
@@ -37,6 +37,6 @@ export function safeApply<Fn extends AnyFn>(
 	try {
 		return [null, fn.apply(thisArg, args)];
 	} catch (error: unknown) {
-		return [ensureError(error, safeApply), null];
+		return errorResult(error, safeApply);
 	}
 }

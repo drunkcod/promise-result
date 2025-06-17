@@ -1,5 +1,5 @@
 import type { Result } from './result.js';
-import { ensureError } from './ensureError.js';
+import { errorResult } from './ensureError.js';
 
 declare global {
 	export interface Promise<T> {
@@ -9,9 +9,8 @@ declare global {
 
 Promise.prototype.result = async function result() {
 	try {
-		const r = await this;
-		return [null, r];
+		return [null, await this];
 	} catch (err) {
-		return [ensureError(err, result), null];
+		return errorResult(err, result);
 	}
 };

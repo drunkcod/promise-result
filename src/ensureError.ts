@@ -18,3 +18,5 @@ export const ensureError = (err: unknown, fn: Function) => {
 
 	return e;
 };
+
+export const errorResult = (error: unknown, stopAt: Function): [Error, null] => [ensureError(error, stopAt), null];
