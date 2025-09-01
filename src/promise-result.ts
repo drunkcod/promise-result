@@ -1,5 +1,4 @@
-import type { Result } from './result.js';
-import { errorResult } from './ensureError.js';
+import { errorResult, Result } from './result.js';
 
 declare global {
 	export interface Promise<T> {
@@ -9,7 +8,7 @@ declare global {
 
 Promise.prototype.result = async function result() {
 	try {
-		return [null, await this];
+		return new Result(null, await this);
 	} catch (err) {
 		return errorResult(err, result);
 	}

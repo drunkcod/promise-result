@@ -4,18 +4,18 @@ import { result, safeApply, safeCall } from './index.js';
 
 describe('Promise.result', () => {
 	test('success', async () => {
-		expect(await Promise.resolve(42).result()).toEqual([null, 42]);
+		expect((await Promise.resolve(42).result()).toArray()).toEqual([null, 42]);
 	});
 
 	test('error', async () => {
 		const error = new Error();
-		expect(await Promise.reject(error).result()).toEqual([error, null]);
+		expect((await Promise.reject(error).result()).toArray()).toEqual([error, null]);
 	});
 });
 
 describe('result', () => {
 	test('success', () => {
-		expect(result(() => 1)()).toEqual([null, 1]);
+		expect(result(() => 1)().toArray()).toEqual([null, 1]);
 	});
 
 	test('error', () => {
@@ -23,7 +23,7 @@ describe('result', () => {
 		expect(
 			result(() => {
 				throw Error();
-			})(),
+			})().toArray(),
 		).toEqual([error, null]);
 	});
 
@@ -35,8 +35,8 @@ describe('result', () => {
 			},
 		};
 		expect({
-			bob: result(obj.hello).call({ message: 'yo' }, 'bob'),
-			alice: result(obj.hello).bind(obj)('alice'),
+			bob: result(obj.hello).call({ message: 'yo' }, 'bob').toArray(),
+			alice: result(obj.hello).bind(obj)('alice').toArray(),
 		}).toEqual({
 			bob: [null, 'yo bob'],
 			alice: [null, 'hello alice'],
@@ -54,7 +54,7 @@ describe('result', () => {
 describe('safeCall', () => {
 	test('success', () => {
 		const double = (x: number) => x + x;
-		expect(safeCall(double, null, 21)).toEqual([null, 42]);
+		expect(safeCall(double, null, 21).toArray()).toEqual([null, 42]);
 	});
 
 	test('error', () => {
@@ -62,7 +62,7 @@ describe('safeCall', () => {
 		expect(
 			safeCall(() => {
 				throw Error();
-			}),
+			}).toArray(),
 		).toEqual([error, null]);
 	});
 });
@@ -70,7 +70,7 @@ describe('safeCall', () => {
 describe('safeApply', () => {
 	test('success', () => {
 		const double = (x: number) => x + x;
-		expect(safeApply(double, null, [21])).toEqual([null, 42]);
+		expect(safeApply(double, null, [21]).toArray()).toEqual([null, 42]);
 	});
 
 	test('error', () => {
@@ -82,7 +82,7 @@ describe('safeApply', () => {
 				},
 				null,
 				[],
-			),
+			).toArray(),
 		).toEqual([error, null]);
 	});
 });
