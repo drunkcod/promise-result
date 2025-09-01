@@ -10,7 +10,8 @@
 		"strict": true,
 		"declaration": true,
 		"esModuleInterop": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"isolatedModules": true
 	},
 	"include": ["src"],
 	"exclude": ["**/*.spec.ts"]
