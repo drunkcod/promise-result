@@ -1,43 +1,49 @@
 import { ensureError } from './ensureError.js';
 
-const errorResult = <T>(error: unknown, stopAt: Function): Result<T> => new Result<T>(ensureError(error, stopAt), null);
+type ErrorResult = { error: Error; value: null; toArray(): [Error, null] };
+type SuccessResult<T> = { error: null; value: T; toArray(): [null, T] };
 
-export type ResultLike<T> =
-	| { error: Error; value: null; toArray(): [Error, null] }
-	| { error: null; value: T; toArray(): [null, T] };
-
-export class Result<T> {
-	error: Error | null;
-	value: T | null;
-
-	toArray(): [Error, null] | [null, T] {
-		return this.error ? [this.error, null] : [null, this.value!];
-	}
-
-	static async of<T>(p: Promise<T>): Promise<ResultLike<T>> {
-		try {
-			return new Result(null, await p) as ResultLike<T>;
-		} catch (err) {
-			return errorResult(err, Result.of) as ResultLike<T>;
-		}
-	}
-
-	constructor(error: Error, value: null);
-	constructor(error: null, value: T);
-	constructor(error: Error | null, value: T | null) {
-		this.error = error;
-		this.value = value;
-	}
-}
+export type Result<T> = ErrorResult | SuccessResult<T>;
 
 type AnyFn = (...args: any[]) => any;
 type ResultFn<Fn extends AnyFn> = (...args: Parameters<Fn>) => Result<ReturnType<Fn>>;
 
+class Outcome<T> {
+	error: Error | null;
+	value: T | null;
+
+	static error(error: Error): ErrorResult {
+		return new Outcome(error, null) as ErrorResult;
+	}
+	static success<T>(value: T): SuccessResult<T> {
+		return new Outcome(null, value) as SuccessResult<T>;
+	}
+
+	private constructor(error: Error | null, value: T | null) {
+		this.error = error;
+		this.value = value;
+	}
+
+	toArray() {
+		return [this.error, this.value!];
+	}
+}
+
+const errorResult = (error: unknown, stopAt: Function) => Outcome.error(ensureError(error, stopAt));
+
+export async function resultOf<T>(this: Promise<T>): Promise<Result<T>> {
+	try {
+		return Outcome.success(await this);
+	} catch (error) {
+		return errorResult(error, resultOf);
+	}
+}
+
 export function result<Fn extends AnyFn>(fn: Fn): ResultFn<Fn> {
 	return function result(this: unknown, ...args: Parameters<Fn>) {
 		try {
-			return new Result(null, fn.call(this, ...args));
-		} catch (error: unknown) {
+			return Outcome.success(fn.call(this, ...args));
+		} catch (error) {
 			return errorResult(error, result);
 		}
 	};
@@ -49,8 +55,8 @@ export function safeCall<Fn extends AnyFn>(
 	...args: Parameters<Fn>
 ): Result<ReturnType<Fn>> {
 	try {
-		return new Result(null, fn.call(thisArg, ...args));
-	} catch (error: unknown) {
+		return Outcome.success(fn.call(thisArg, ...args));
+	} catch (error) {
 		return errorResult(error, safeCall);
 	}
 }
@@ -61,8 +67,8 @@ export function safeApply<Fn extends AnyFn>(
 	args: Parameters<Fn>,
 ): Result<ReturnType<Fn>> {
 	try {
-		return new Result(null, fn.apply(thisArg, args));
-	} catch (error: unknown) {
+		return Outcome.success(fn.apply(thisArg, args));
+	} catch (error) {
 		return errorResult(error, safeApply);
 	}
 }

@@ -1,11 +1,9 @@
-import { Result, ResultLike } from './result.js';
+import { Result, resultOf } from './result.js';
 
 declare global {
 	export interface Promise<T> {
-		result(): Promise<ResultLike<T>>;
+		result(): Promise<Result<T>>;
 	}
 }
 
-Promise.prototype.result = function result() {
-	return Result.of(this);
-};
+Promise.prototype.result = resultOf;
