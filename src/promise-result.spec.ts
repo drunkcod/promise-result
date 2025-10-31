@@ -3,13 +3,33 @@ import './promise-result.js';
 import { result, safeApply, safeCall } from './index.js';
 
 describe('Promise.result', () => {
+	const notNull = <T>(x: T) => {};
+
 	test('success', async () => {
-		expect((await Promise.resolve(42).result()).toArray()).toEqual([null, 42]);
+		const r = (await Promise.resolve(42).result()).toArray();
+		expect(r).toEqual([null, 42]);
 	});
 
 	test('error', async () => {
 		const error = new Error();
-		expect((await Promise.reject(error).result()).toArray()).toEqual([error, null]);
+		const r = (await Promise.reject(error).result()).toArray();
+		expect(r).toEqual([error, null]);
+	});
+
+	test('array destructed error', async () => {
+		const expectedError = new Error();
+		const [error, value] = (await Promise.reject(expectedError).result()).toArray();
+		expect([error, value]).toEqual([expectedError, null]);
+	});
+
+	test('array destructed value', async () => {
+		const [error, value] = (await Promise.resolve('hello').result()).toArray();
+		if (!error) notNull<string>(value);
+	});
+
+	test('destructed value', async () => {
+		const { error, value } = await Promise.resolve(42).result();
+		if (!error) notNull(value);
 	});
 });
 
@@ -46,7 +66,7 @@ describe('result', () => {
 	test('stack', () => {
 		const [error, _] = result(() => {
 			throw 'rocks';
-		})();
+		})().toArray();
 		//console.log(error);
 	});
 });

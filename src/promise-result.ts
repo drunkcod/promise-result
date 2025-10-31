@@ -1,15 +1,11 @@
-import { errorResult, Result } from './result.js';
+import { Result, ResultLike } from './result.js';
 
 declare global {
 	export interface Promise<T> {
-		result(): Promise<Result<T>>;
+		result(): Promise<ResultLike<T>>;
 	}
 }
 
-Promise.prototype.result = async function result() {
-	try {
-		return new Result(null, await this);
-	} catch (err) {
-		return errorResult(err, result);
-	}
+Promise.prototype.result = function result() {
+	return Result.of(this);
 };

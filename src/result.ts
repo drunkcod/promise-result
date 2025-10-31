@@ -1,16 +1,25 @@
 import { ensureError } from './ensureError.js';
 
+const errorResult = <T>(error: unknown, stopAt: Function): Result<T> => new Result<T>(ensureError(error, stopAt), null);
+
+export type ResultLike<T> =
+	| { error: Error; value: null; toArray(): [Error, null] }
+	| { error: null; value: T; toArray(): [null, T] };
+
 export class Result<T> {
 	error: Error | null;
 	value: T | null;
 
-	*[Symbol.iterator]() {
-		yield this.error;
-		yield this.value;
+	toArray(): [Error, null] | [null, T] {
+		return this.error ? [this.error, null] : [null, this.value!];
 	}
 
-	toArray() {
-		return Array.from(this);
+	static async of<T>(p: Promise<T>): Promise<ResultLike<T>> {
+		try {
+			return new Result(null, await p) as ResultLike<T>;
+		} catch (err) {
+			return errorResult(err, Result.of) as ResultLike<T>;
+		}
 	}
 
 	constructor(error: Error, value: null);
@@ -21,12 +30,7 @@ export class Result<T> {
 	}
 }
 
-export const errorResult = <T>(error: unknown, stopAt: Function): Result<T> =>
-	new Result<T>(ensureError(error, stopAt), null);
-
 type AnyFn = (...args: any[]) => any;
-
-//prettier-ignore
 type ResultFn<Fn extends AnyFn> = (...args: Parameters<Fn>) => Result<ReturnType<Fn>>;
 
 export function result<Fn extends AnyFn>(fn: Fn): ResultFn<Fn> {
