@@ -30,10 +30,16 @@ class Outcome<T> {
 }
 
 const errorResult = (error: unknown, stopAt: Function) => Outcome.error(ensureError(error, stopAt));
+const noPromise = () => {
+	throw new Error('Missing this or argument.');
+};
 
-export async function resultOf<T>(this: Promise<T>): Promise<Result<T>> {
+export async function resultOf<T>(this: Promise<T>): Promise<Result<T>>;
+export async function resultOf<T>(arg0: Promise<T>): Promise<Result<T>>;
+export async function resultOf<T>(this: Promise<T>, arg0?: Promise<T>): Promise<Result<T>> {
+	const target = this ?? arg0 ?? noPromise();
 	try {
-		return Outcome.success(await this);
+		return Outcome.success(await target);
 	} catch (error) {
 		return errorResult(error, resultOf);
 	}
